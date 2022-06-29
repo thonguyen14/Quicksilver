@@ -1,0 +1,117 @@
+Quicksilver - killerqeen : https://nodejumper.io/quicksilver-testnet/installation
+
+# replace nodejumper with your own moniker, if you'd like
+
+$ . <(curl -s https://raw.githubusercontent.com/nodejumper-org/cosmos-utils/main/installation-scripts/quicksilver-testnet_install.sh) \
+MONIKER-NAME
+  
+  ----> Created symlink /etc/systemd/system/multi-user.target.wants/quicksilverd.service → /etc/systemd/system/quicksilverd.service
+
+$ sudo journalctl -u quicksilverd -f --no-hostname -o cat   ( LỆNH NÀY CHECK LỖI PORT THÌ KÉO XUỐNG DƯỚI XEM GUIDE ĐỔI RỒI CHẠY TIẾP )
+
+*****TẠO TRÌNH XÁC THỰC
+
+# Create wallet
+
+$ quicksilverd keys add WALLET-NAME
+
+
+
+## Console output
+#- name: wallet
+#  type: local
+#  address: quick159njc3xk0xv76x323936frgwxf9zn3wvlzrlf6
+#  pubkey: '{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"Auq9WzVEs5pCoZgr2WctjI7fU+lJCH0I3r6GC1oa0tc0"}'
+#  mnemonic: ""
+
+   chú ý SAVE SEED PHRASE
+
+# Wait util the node is synced, should return FALSE ( Kiểm tra node đã đồng bộ xong chưa , Nếu "catching_up” = false là sync xong )
+
+  $curl -s localhost:26757/status | jq '.result."sync_info",.result."validator_info",.result."node_info"."network"'
+
+# Go to discord channel #qck-tap and paste
+
+ $request WALLET-ADDRESS killerqueen
+ 
+ xin faucet đc thì check balance trong kênh #qck-tap bằng lệnh sau :
+ 
+ $balance WALLET-ADDRESS killerqueen 
+
+
+## Console output
+#  balances:
+#  - amount: "5000000"
+#    denom: uqck
+
+quicksilverd ACCOUNT :
+
+  $quicksilverd keys show WALLET-NAME --bech=acc  
+
+VALIDATOR ACCOUNT :
+  
+  $ quicksilverd keys show WALLET-NAME --bech=val
+
+
+# Create validator
+quicksilverd tx staking create-validator \
+--amount=4990000uqck \
+--pubkey=$(quicksilverd tendermint show-validator) \
+--moniker=MONIKER-NAME \
+--chain-id=killerqueen-1 \
+--commission-rate=0.1 \
+--commission-max-rate=0.2 \
+--commission-max-change-rate=0.05 \
+--min-self-delegation=1 \
+--fees=2000uqck \
+--gas=auto \
+--from=WALLE-NAME \
+--node="http://127.0.0.1:26757" \
+-y
+
+lưu tx lại , check node tại https://quicksilver.explorers.guru/
+
+******OK OK OK ****
+TẠO Mainnet Keplr Wallet address ( mainnet ) : PHẦN NÀY ĐỂ LẤY VÍ MAINNET ĐIỀN FORM
+ 
+  $./quicksilverd keys add WALLET-NAME --interactive  
+  nhập mnemonic cũ và passphrase -- > y ---> enter
+  
+  CHẠY ĐẾN LỆNH SỐ 2 $sudo journalctl -u quicksilverd -f --no-hostname -o cat , CHECK LỖI thì tiến hành đổi port như hướng dẫn dưới đây 
+  
+  HƯỚNG DẪN ĐỔI PORT 
+
+Nếu báo lỗi port tương tự như này :
+
+ERR pprof server error err="listen tcp 127.0.0.1:6060: bind: address already in use"
+Error: failed to listen on 127.0.0.1:26657: listen tcp 127.0.0.1:26657: bind: address already in use
+
+Thực hiện tìm port cần đổi và thay đổi port. 
+Thông thường các dự án xài Cosmos SDK thì thường xài chung default port của Tendermint là 2265x, 909x, 606x...
+Vì thế tùy tình hình thực tế mà port có thể thay đổi trong lệnh (tốt nhất cứ chạy VM mới, show log và lỗi ở port nào thì tìm và đổi)
+
+   $ cd $HOME/.quicksilverd/config && grep -n "909.*\|266.*\|1317\|606.*" *.toml | grep -v persistent_peers
+   
+Đầu ra như dưới đây :   
+
+root@vmi911879:~# cd $HOME/.quicksilverd/config && grep -n "909.*\|266.*\|1317\|606.*" *.toml | grep -v persistent_peers
+app.toml:114:address = "tcp://0.0.0.0:1317"
+app.toml:165:address = "0.0.0.0:9090"
+app.toml:178:address = "0.0.0.0:9091"
+client.toml:15:node = "tcp://localhost:26657"
+config.toml:15:proxy_app = "tcp://127.0.0.1:26658"
+config.toml:91:laddr = "tcp://127.0.0.1:26657"
+config.toml:194:pprof_laddr = "localhost:6060"
+config.toml:202:laddr = "tcp://0.0.0.0:26656"
+config.toml:208:# example: 159.89.10.97:26656
+config.toml:212:seeds = "dd3460ec11f78b4a7c4336f22a356fe00805ab64@seed.killerqueen-1.quicksilver.zone:26656,8603d0778bfe0a8d2f8eaa860dcdc5eb85b55982@seed02.killerqueen-1.quicksilver.zone:27676"
+config.toml:419:prometheus_listen_addr = ":26660"
+
+    $vi config.toml HOẶC $vi app.toml ( Tùy port cần đổi nằm ở file nào )
+ Gõ :set nu --> enter , ấn i và tiến hành đổi 6060 -->6260 và 26657 --> 26757 ,26656 --> 26756 , 9090 --> 9290 , 9091--> 9291 . ấn Esc --> :wq để save
+   
+sau đó : 
+
+$sudo systemctl restart quicksilverd
+$sudo journalctl -u quicksilverd -f --no-hostname -o cat
+$curl -s localhost:26757/status | jq '.result."sync_info",.result."validator_info",.result."node_info"."network"'
