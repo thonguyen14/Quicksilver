@@ -92,7 +92,7 @@ Vì thế tùy tình hình thực tế mà port có thể thay đổi trong lệ
 
    $ cd $HOME/.quicksilverd/config && grep -n "909.*\|266.*\|1317\|606.*" *.toml | grep -v persistent_peers
    
-Đầu ra như dưới đây :   
+Đầu ra như dưới đây :   nó trả ra trong 1 dòng lần lượt là --> tên file:số thứ tự dòng trong file:... = "tcp://0.0.0.0:port-cần-đổi"
 
 root@vmi911879:~# cd $HOME/.quicksilverd/config && grep -n "909.*\|266.*\|1317\|606.*" *.toml | grep -v persistent_peers
 app.toml:114:address = "tcp://0.0.0.0:1317"
@@ -106,6 +106,8 @@ config.toml:202:laddr = "tcp://0.0.0.0:26656"
 config.toml:208:# example: 159.89.10.97:26656
 config.toml:212:seeds = "dd3460ec11f78b4a7c4336f22a356fe00805ab64@seed.killerqueen-1.quicksilver.zone:26656,8603d0778bfe0a8d2f8eaa860dcdc5eb85b55982@seed02.killerqueen-1.quicksilver.zone:27676"
 config.toml:419:prometheus_listen_addr = ":26660"
+
+nhìn xem port cần đổi nằm ở file nào , dòng số bao nhiêu rồi chạy lệnh dưới đây tìm tới đó để đổi
 
     $vi config.toml HOẶC $vi app.toml ( Tùy port cần đổi nằm ở file nào )
  Gõ :set nu --> enter , ấn i và tiến hành đổi 6060 -->6260 và 26657 --> 26757 ,26656 --> 26756 , 9090 --> 9290 , 9091--> 9291 . ấn Esc --> :wq để save
